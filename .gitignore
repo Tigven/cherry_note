@@ -8,7 +8,7 @@ __pycache__/
 venv/
 ENV/
 
-# env file
+# .env file for django-environ module
 .env
 
 # pycharm

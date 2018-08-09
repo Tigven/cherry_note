@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from cherry_note.users.models import User
 from rest_framework import serializers, viewsets
 
 # Serializers define the API representation.
