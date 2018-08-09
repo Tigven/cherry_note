@@ -24,11 +24,11 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
 
     # User management
-    path(
-        "users/",
-        include("cherry_note.users.urls", namespace="users"),
-    ),
-    path("accounts/", include("allauth.urls")),
+    #path(
+    #    "users/",
+    #    include("cherry_note.users.urls", namespace="users"),
+    #),
+    #path("accounts/", include("allauth.urls")),
 
     # Your stuff: custom urls includes go here
     path("", include(router.urls)),
