@@ -20,6 +20,11 @@ Moved to settings_.
 
 Basic Commands
 --------------
+Install requirements
+^^^^^^^^^^^^^^^^^^^^^
+|    $ git clone https://github.com/xorium/cherry_note.git && cd cherry_note
+|    $ pip install -r ./requirements/local.txt
+
 
 Setting Up Your Users
 ^^^^^^^^^^^^^^^^^^^^^

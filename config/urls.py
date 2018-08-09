@@ -5,22 +5,34 @@ from django.contrib import admin
 from django.views.generic import TemplateView
 from django.views import defaults as default_views
 
+from rest_framework import routers
+from cherry_note.users.serializers import UserViewSet
+
+# Routers provide an easy way of automatically determining the URL conf.
+router = routers.DefaultRouter()
+router.register(r'users', UserViewSet)
+
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
-    path(
-        "about/",
-        TemplateView.as_view(template_name="pages/about.html"),
-        name="about",
-    ),
+    #path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
+    #path(
+    #    "about/",
+    #    TemplateView.as_view(template_name="pages/about.html"),
+    #    name="about",
+    #),
+
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
+
     # User management
     path(
         "users/",
         include("cherry_note.users.urls", namespace="users"),
     ),
     path("accounts/", include("allauth.urls")),
+
     # Your stuff: custom urls includes go here
+    path("", include(router.urls)),
+    path("api-auth/", include('rest_framework.urls', namespace='rest_framework'))
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
 )
