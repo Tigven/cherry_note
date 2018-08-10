@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 
+from cherry_note.users.models import User
+
 class Tag(models.Model):
     name = models.CharField(verbose_name="Tag name", max_length=1024)
 
@@ -32,6 +34,7 @@ class Note(models.Model):
 
     tags = models.ManyToManyField(
         Tag, blank=True, null=True,
+        related_name="notes",
         verbose_name="Tags"
     )
     children = models.ManyToManyField(
@@ -43,6 +46,18 @@ class Note(models.Model):
         blank=True, null=True,
         verbose_name="Parent note"
     )
+    owner = models.ForeignKey(
+        User, on_delete=models.DO_NOTHING,
+        blank=True, null=True,
+        verbose_name="Owner"
+    )
+
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            pass # new
+        else:
+            pass # update
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

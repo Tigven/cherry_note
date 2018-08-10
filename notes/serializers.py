@@ -1,9 +1,34 @@
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 from notes.models import Note, Tag
 
-class NoteTagsField(serializers.HyperlinkedRelatedField):
-    def to_native(self, value):
-        return {str(value.pk): value.name}
+"""
+class NoteModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note
+        fields = ('id', 'name', 'is_read_only',)
+"""
+
+class TagModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note
+        fields = ('name',)
+
+class NoteChildrenHyperlink(serializers.HyperlinkedRelatedField):
+    def get_url(self, obj, view_name, request, format):
+        url = reverse(
+            viewname='note-children', args=[obj.pk.instance.id],
+            request=request, format=format
+        )
+        return url
+
+class NoteTagsHyperlink(serializers.HyperlinkedRelatedField):
+    def get_url(self, obj, view_name, request, format):
+        url = reverse(
+            viewname='note-tags', args=[obj.pk.instance.id],
+            request=request, format=format
+        )
+        return url
 
 class NoteSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -25,13 +50,25 @@ class NoteSerializer(serializers.Serializer):
     ts_updated = serializers.DateTimeField(read_only=True)
     is_read_only = serializers.BooleanField(required=False)
 
+    owner = serializers.HyperlinkedRelatedField(
+        view_name='user-detail',
+        read_only=True,
+    )
     parent = serializers.HyperlinkedRelatedField(
         view_name='note-detail',
-        queryset=Note.objects.all(),
+        queryset=Note.objects.all()[:30],
     )
-    tags = NoteTagsField(
-        view_name='note-tags', read_only=True,
-        many=True
+    #tags = NoteTagsHyperlink(
+    #    view_name='note-tags',
+    #    read_only=True,
+    #)
+    tags = TagModelSerializer(
+        many=True, #read_only=True,
+        #queryset=Tag.objects.all(),
+    )
+    children = NoteChildrenHyperlink(
+        view_name='note-children',
+        read_only=True,
     )
 
     def create(self, validated_data):
