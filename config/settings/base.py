@@ -71,6 +71,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'cherry_note.users.apps.UsersAppConfig',
     'notes.apps.NotesConfig',
+    'uploads.apps.UploadsConfig',
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -242,5 +243,11 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
 }
+
+UPLOADS_DIR = '/tmp/uploads'

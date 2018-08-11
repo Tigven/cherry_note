@@ -5,7 +5,7 @@ import json
 
 class NoteAdmin(admin.ModelAdmin):
     list_display = [
-        'id', 'name', 'syntax',
+        'id', 'name', 'syntax', 'level',
         'is_read_only', 'parent_node', 'children',
         'tags', 'content',
         'has_code_box', 'has_table', 'has_image', 'has_file',
@@ -14,7 +14,9 @@ class NoteAdmin(admin.ModelAdmin):
     list_filter = ('syntax', 'is_read_only')
 
     def parent_node(self, instance):
-        return instance.id
+        if instance.parent:
+            return instance.parent.id
+        return 'None'
 
     def children(self, instance):
         children = instance.children.all()
@@ -26,6 +28,7 @@ class NoteAdmin(admin.ModelAdmin):
         return json.dumps(result)
 
     def tags(self, instance):
+        return list(instance.tags)
         note_tags = instance.tags.all()
 
         return json.dumps([tag.name for tag in note_tags])
@@ -37,4 +40,4 @@ class TagAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Note, NoteAdmin)
-admin.site.register(Tag, TagAdmin)
+#admin.site.register(Tag, TagAdmin)

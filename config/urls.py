@@ -41,6 +41,10 @@ urlpatterns = [
         include("rest_framework.urls", namespace="rest_framework")
     ),
     path("api/users/<int:user_id>/notes/", view=UserNotesAPIView.as_view(), name="users:user_notes"),
+    path(
+        "api/uploads/",
+        include("uploads.urls", namespace="uploads"),
+    ),
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
 )

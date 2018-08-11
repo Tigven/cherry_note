@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
-from notes.models import Note, Tag
+from notes.models import Note, Tag, File
+
+import json
 
 """
 class NoteModelSerializer(serializers.ModelSerializer):
@@ -9,9 +11,14 @@ class NoteModelSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'is_read_only',)
 """
 
+class FileModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = ('owner', 'name', 'size', 'url', 'info')
+
 class TagModelSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Note
+        model = Tag
         fields = ('name',)
 
 class NoteChildrenHyperlink(serializers.HyperlinkedRelatedField):
@@ -29,6 +36,17 @@ class NoteTagsHyperlink(serializers.HyperlinkedRelatedField):
             request=request, format=format
         )
         return url
+
+class TagsListField(serializers.ListField):
+    child = serializers.CharField()
+
+    def to_representation(self, data):
+        tags = data[0]
+        return list(tags)
+        return json.dumps(list(tags), default=str)
+
+    def to_internal_value(self, data):
+        return json.loads(data)
 
 class NoteSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -57,15 +75,20 @@ class NoteSerializer(serializers.Serializer):
     parent = serializers.HyperlinkedRelatedField(
         view_name='note-detail',
         queryset=Note.objects.all()[:30],
+        required=False,
     )
     #tags = NoteTagsHyperlink(
     #    view_name='note-tags',
     #    read_only=True,
     #)
-    tags = TagModelSerializer(
-        many=True, #read_only=True,
-        #queryset=Tag.objects.all(),
-    )
+    #tags = TagModelSerializer(
+    #    many=True, #read_only=True,
+    #    #queryset=Tag.objects.all(),
+    #)
+    #tags = TagsListField(
+    #    required=False,
+    #)
+    tags = serializers.JSONField(required=False)
     children = NoteChildrenHyperlink(
         view_name='note-children',
         read_only=True,
@@ -75,6 +98,7 @@ class NoteSerializer(serializers.Serializer):
         """
         Create and return a new `Note` instance, given the validated data.
         """
+        print(validated_data)
         return Note.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
