@@ -6,9 +6,10 @@ from django.views.generic import TemplateView
 from django.views import defaults as default_views
 
 from rest_framework import routers
+from rest_framework.authtoken import views
 
 from cherry_note.users.serializers import UserViewSet
-from notes.views import NoteViewSet, TagViewSet, UserNotesAPIView
+from notes.views import NoteViewSet, TagViewSet
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
@@ -37,10 +38,11 @@ urlpatterns = [
     # Your stuff: custom urls includes go here
     path("", include(router.urls)),
     path(
-        "api-auth/",
+        "api/auth/",
         include("rest_framework.urls", namespace="rest_framework")
     ),
-    path("api/users/<int:user_id>/notes/", view=UserNotesAPIView.as_view(), name="users:user_notes"),
+    path("api/token-auth/", views.obtain_auth_token),
+    #path("api/users/<int:user_id>/notes/", view=UserNotesAPIView.as_view(), name="users:user_notes"),
     path(
         "api/uploads/",
         include("uploads.urls", namespace="uploads"),

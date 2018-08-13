@@ -5,7 +5,7 @@ import json
 
 class NoteAdmin(admin.ModelAdmin):
     list_display = [
-        'id', 'name', 'syntax', 'level',
+        'id', 'name', 'syntax', 'level', 'owner',
         'is_read_only', 'parent_node', 'children',
         'tags', 'content',
         'has_code_box', 'has_table', 'has_image', 'has_file',

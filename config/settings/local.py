@@ -12,6 +12,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "0.0.0.0",
     "127.0.0.1",
+    "199.217.118.251",
 ]
 
 # CACHES
@@ -66,3 +67,10 @@ INSTALLED_APPS += ['django_extensions']  # noqa F405
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+CORS_ORIGIN_WHITELIST = (
+    'localhost:8080',
+    '127.0.0.1:8080',
+    'localhost:80',
+    '127.0.0.1:80',
+)

@@ -21,15 +21,16 @@ class NoteViewSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list` and `detail` actions.
     """
-    permission_classes = [IsAdminOrIsSelf]
-    authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrIsSelf]
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
 
     def create(self, request):
         user = request.user
         data = request.data
+        print(user)
 
+        data['owner'] = user
         user_filter = Q(owner=user)
 
         # Note's name may not be empty string
@@ -74,7 +75,17 @@ class NoteViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def list(self, request, *args, **kwargs):
-        notes = Note.objects.filter(owner=request.user)\
+        # `show_all` argument for disabling filtering by user
+        # Option is available for admin only
+        show_all = request.query_params.get('show_all', 0)
+        if not request.user.is_superuser:
+            show_all = 0
+
+        query_filter = Q(owner=request.user)
+        if show_all:
+            query_filter = Q()
+
+        notes = Note.objects.filter(query_filter)\
             .select_related('owner', 'parent')
         serializer = NoteSerializer(notes, many=True, context={'request': request})
 
