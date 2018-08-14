@@ -27,8 +27,7 @@ class NoteViewSet(viewsets.ModelViewSet):
 
     def create(self, request):
         user = request.user
-        data = request.data
-        print(user)
+        data = dict(request.data)
 
         data['owner'] = user
         user_filter = Q(owner=user)

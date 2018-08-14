@@ -26,6 +26,7 @@ class Note(models.Model):
         default=SIMPLE, blank=True, null=True,
     )
     is_read_only = models.BooleanField(verbose_name="Read only", default=False)
+    is_expanded = models.BooleanField(verbose_name="Expanded", default=False)
     has_code_box = models.BooleanField(verbose_name="Has code box", default=False)
     has_table = models.BooleanField(verbose_name="Has table", default=False)
     has_image = models.BooleanField(verbose_name="Has image", default=False)

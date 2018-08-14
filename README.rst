@@ -26,7 +26,7 @@ Install requirements
 |   $ git clone https://github.com/xorium/cherry_note.git && cd cherry_note
 |   $ ./requirements/base.sh && ./requirements/setup.sh
 |   $ pip install -r ./requirements/local.txt
-|   $ mv .env.example .env # edit it
+|   $ cp .env.example .env # edit it
 |   $ ./manage.py migrate && ./manage.py createsuperuser
 |   $ ./manage.py runserver 0:8000
 
