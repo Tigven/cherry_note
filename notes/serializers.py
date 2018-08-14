@@ -4,23 +4,6 @@ from notes.models import Note, Tag, File
 
 import json
 
-"""
-class NoteModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Note
-        fields = ('id', 'name', 'is_read_only',)
-"""
-
-class FileModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = File
-        fields = ('owner', 'name', 'size', 'url', 'info')
-
-class TagModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ('name',)
-
 class NoteChildrenHyperlink(serializers.HyperlinkedRelatedField):
     def get_url(self, obj, view_name, request, format):
         url = reverse(
@@ -28,6 +11,24 @@ class NoteChildrenHyperlink(serializers.HyperlinkedRelatedField):
             request=request, format=format
         )
         return url
+
+class NoteChildrenField(serializers.HyperlinkedRelatedField):
+    """
+    Note's children (URL to resource or list of children if
+    `is_expanded` filed of note is set to True)
+    """
+    def get_attribute(self, obj):
+        return obj
+
+    def to_representation(self, obj):
+        if obj.is_expanded:
+            children = obj.children.filter(parent__id=obj.id)
+            serializer = PartialNoteSerializer(
+                children, many=True, read_only=True
+            )
+            return serializer.data
+        else:
+            return list()
 
 class NoteTagsHyperlink(serializers.HyperlinkedRelatedField):
     def get_url(self, obj, view_name, request, format):
@@ -48,6 +49,37 @@ class TagsListField(serializers.ListField):
     def to_internal_value(self, data):
         return json.loads(data)
 
+"""
+class NoteModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note
+        fields = ('id', 'name', 'is_read_only',)
+"""
+
+class FileModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = ('owner', 'name', 'size', 'url', 'info')
+
+class TagModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ('name',)
+
+class PartialNoteSerializer(serializers.ModelSerializer):
+    children = NoteChildrenField(
+        view_name='note-children',
+        read_only=True,
+    )
+    
+    class Meta:
+        model = Note
+        fields = (
+            'id', 'name', 'syntax', 'level', 'children',
+            'is_expanded', 'tags', 'is_read_only',
+            'has_code_box', 'has_table', 'has_image', 'has_file',
+        )
+
 class NoteSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(
@@ -67,6 +99,7 @@ class NoteSerializer(serializers.Serializer):
     ts_created = serializers.DateTimeField(read_only=True)
     ts_updated = serializers.DateTimeField(read_only=True)
     is_read_only = serializers.BooleanField(required=False)
+    is_expanded = serializers.BooleanField(required=False)
 
     owner = serializers.HyperlinkedRelatedField(
         view_name='user-detail',
@@ -89,7 +122,11 @@ class NoteSerializer(serializers.Serializer):
     #    required=False,
     #)
     tags = serializers.JSONField(required=False)
-    children = NoteChildrenHyperlink(
+    #children = NoteChildrenHyperlink(
+    #    view_name='note-children',
+    #    read_only=True,
+    #)
+    children = NoteChildrenField(
         view_name='note-children',
         read_only=True,
     )

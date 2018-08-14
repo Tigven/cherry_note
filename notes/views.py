@@ -25,6 +25,7 @@ class NoteViewSet(viewsets.ModelViewSet):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
 
+    # TODO: saving data with NoteSerializer
     def create(self, request):
         user = request.user
         data = dict(request.data)
@@ -80,9 +81,12 @@ class NoteViewSet(viewsets.ModelViewSet):
         if not request.user.is_superuser:
             show_all = 0
 
-        query_filter = Q(owner=request.user)
+        # Select 0 level only hierarchy nodes
+        query_filter = Q(level=0)
+        
+        user_filter = Q(owner=request.user)
         if show_all:
-            query_filter = Q()
+            query_filter &= user_filter
 
         notes = Note.objects.filter(query_filter)\
             .select_related('owner', 'parent')
@@ -96,7 +100,7 @@ class NoteViewSet(viewsets.ModelViewSet):
     )
     def children(self, request, pk=None):
         note = get_object_or_404(Note, pk=pk)
-        children = note.children.all()
+        children = note.children.filter(parent__id=note.id)
         serializer = NoteSerializer(
             children, many=True,
             context={'request': request}

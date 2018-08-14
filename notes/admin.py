@@ -6,8 +6,8 @@ import json
 class NoteAdmin(admin.ModelAdmin):
     list_display = [
         'id', 'name', 'syntax', 'level', 'owner',
-        'is_read_only', 'parent_node', 'children',
-        'tags', 'content',
+        'is_expanded', 'parent_node', 'note_children',
+        'tags', 'content', 'is_read_only',
         'has_code_box', 'has_table', 'has_image', 'has_file',
     ]
 
@@ -18,12 +18,13 @@ class NoteAdmin(admin.ModelAdmin):
             return instance.parent.id
         return 'None'
 
-    def children(self, instance):
+    def note_children(self, instance):
         children = instance.children.all()
 
         result = []
         for child in children:
-            result.append('{}|{}'.format(child.id, child.name))
+            #result.append('{} | {}'.format(child.id, child.name))
+            result.append(child.id)
 
         return json.dumps(result)
 
