@@ -25,6 +25,34 @@ class NoteViewSet(viewsets.ModelViewSet):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
 
+    def update(self, request, pk=None):
+        note = get_object_or_404(Note, pk=pk)
+        data = dict(request.data)
+
+        # When note's parent will be updated, we need to remove
+        # this note from previousr parent children lsit and add
+        # it to new parent children list
+        parent_upd = data.get('parent', {}) or {}
+        parent_upd_id = parent_upd.get('id', None)
+        if parent_upd_id is not None and note.parent.id != parent_upd_id:
+            parent_upd = get_object_or_404(Note, id=parent_upd_id)
+            data['parent_note'] = parent_upd
+
+            note.parent.children.remove(note)
+            parent_upd.children.add(note)
+            # Updating current note level
+            data['level'] = parent_upd.level + 1
+
+        serializer = NoteSerializer(
+            note, data,
+            context={'request': request}, 
+            partial=True
+        )
+        serializer.is_valid()
+        serializer.update(note, data)
+        
+        return Response(serializer.data)
+
     # TODO: saving data with NoteSerializer
     def create(self, request):
         user = request.user
@@ -60,7 +88,7 @@ class NoteViewSet(viewsets.ModelViewSet):
         # Check if note with this name exists
         exists_query = user_filter & Q(name=data['name'])
         if parent_note:
-            exists_query &= Q(parent=data['parent'])
+            exists_query &= Q(parent=parent_note)
 
         if Note.objects.filter(exists_query).exists():
             resp = {
@@ -71,6 +99,10 @@ class NoteViewSet(viewsets.ModelViewSet):
         # Create the note
         note = Note.objects.create(**data)
         serializer = NoteSerializer(note, context={'request': request})
+
+        # If parent is set update it's children list too
+        if parent_note:
+            parent_note.children.add(note)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -83,14 +115,17 @@ class NoteViewSet(viewsets.ModelViewSet):
 
         # Select 0 level only hierarchy nodes
         query_filter = Q(level=0)
-        
+
         user_filter = Q(owner=request.user)
         if show_all:
             query_filter &= user_filter
 
         notes = Note.objects.filter(query_filter)\
             .select_related('owner', 'parent')
-        serializer = NoteSerializer(notes, many=True, context={'request': request})
+        serializer = NoteSerializer(
+            notes, many=True,
+            context={'request': request}
+        )
 
         return Response(serializer.data)
 
@@ -135,6 +170,9 @@ class UserNotesAPIView(APIView):
 
     def get(self, request, user_id=None):
         notes = Note.objects.filter(owner__id=user_id)
-        serializer = NoteSerializer(notes, many=True, context={'request': request})
+        serializer = NoteSerializer(
+            notes, many=True,
+            context={'request': request}
+        )
 
         return Response(serializer.data)

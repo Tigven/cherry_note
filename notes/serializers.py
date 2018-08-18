@@ -1,6 +1,9 @@
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.reverse import reverse
+
 from notes.models import Note, Tag, File
+from cherry_note.users.serializers import UserSerializer
 
 import json
 
@@ -21,14 +24,22 @@ class NoteChildrenField(serializers.HyperlinkedRelatedField):
         return obj
 
     def to_representation(self, obj):
+        children = obj.children.filter(parent__id=obj.id)
+        serializer = PartialNoteSerializer(
+            children, many=True, read_only=True
+        )
+        return serializer.data
+
         if obj.is_expanded:
             children = obj.children.filter(parent__id=obj.id)
             serializer = PartialNoteSerializer(
                 children, many=True, read_only=True
             )
             return serializer.data
-        else:
+        elif obj.children.count():
             return list()
+        else:
+            return None
 
 class NoteTagsHyperlink(serializers.HyperlinkedRelatedField):
     def get_url(self, obj, view_name, request, format):
@@ -66,16 +77,22 @@ class TagModelSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ('name',)
 
+class NoteIDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note
+        fields = ('id',)
+
 class PartialNoteSerializer(serializers.ModelSerializer):
     children = NoteChildrenField(
         view_name='note-children',
         read_only=True,
     )
+    parent = NoteIDSerializer()
     
     class Meta:
         model = Note
         fields = (
-            'id', 'name', 'syntax', 'level', 'children',
+            'id', 'name', 'syntax', 'level', 'children', 'parent',
             'is_expanded', 'tags', 'is_read_only',
             'has_code_box', 'has_table', 'has_image', 'has_file',
         )
@@ -91,25 +108,27 @@ class NoteSerializer(serializers.Serializer):
         choices=Note.SYNTAX_CHOICES,
         default='simple'
     )
-    has_code_box = serializers.BooleanField(required=False, read_only=True)
-    has_table = serializers.BooleanField(required=False, read_only=True)
-    has_image = serializers.BooleanField(required=False, read_only=True)
-    has_file = serializers.BooleanField(required=False, read_only=True)
+    has_code_box = serializers.BooleanField(required=False)
+    has_table = serializers.BooleanField(required=False)
+    has_image = serializers.BooleanField(required=False)
+    has_file = serializers.BooleanField(required=False)
     level = serializers.IntegerField(required=False)
     ts_created = serializers.DateTimeField(read_only=True)
     ts_updated = serializers.DateTimeField(read_only=True)
     is_read_only = serializers.BooleanField(required=False)
     is_expanded = serializers.BooleanField(required=False)
 
-    owner = serializers.HyperlinkedRelatedField(
-        view_name='user-detail',
-        read_only=True,
-    )
-    parent = serializers.HyperlinkedRelatedField(
-        view_name='note-detail',
-        queryset=Note.objects.all()[:30],
-        required=False,
-    )
+    #owner = serializers.HyperlinkedRelatedField(
+    #    view_name='user-detail',
+    #    read_only=True,
+    #)
+    owner = UserSerializer(read_only=True)
+    parent = NoteIDSerializer()
+    #parent = serializers.HyperlinkedRelatedField(
+    #    view_name='note-detail',
+    #    queryset=Note.objects.all()[:30],
+    #    required=False,
+    #)
     #tags = NoteTagsHyperlink(
     #    view_name='note-tags',
     #    read_only=True,
@@ -135,7 +154,6 @@ class NoteSerializer(serializers.Serializer):
         """
         Create and return a new `Note` instance, given the validated data.
         """
-        print(validated_data)
         return Note.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
@@ -147,9 +165,13 @@ class NoteSerializer(serializers.Serializer):
         instance.is_read_only = validated_data.get(
             'is_read_only', instance.is_read_only
         )
+        validated_data.get(
+            'is_expanded', instance.is_expanded
+        )
         instance.syntax = validated_data.get('syntax', instance.syntax)
-        instance.style = validated_data.get('style', instance.style)
         instance.level = validated_data.get('level', instance.level)
+        instance.ts_updated = timezone.now()
+        instance.parent = validated_data.get('parent_note', instance.parent)
 
         instance.save()
 
