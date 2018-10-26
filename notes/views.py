@@ -13,7 +13,12 @@ from rest_framework.authentication import (
 from rest_framework import permissions
 
 from notes.models import Note, Tag
-from notes.serializers import NoteSerializer, TagModelSerializer
+from notes.serializers import (
+    NoteSerializer,
+    TagModelSerializer,
+    PartialNoteSerializer,
+    SimplifiedNoteSerializer,
+)
 from notes.permissions import *
 
 
@@ -30,7 +35,7 @@ class NoteViewSet(viewsets.ModelViewSet):
         data = dict(request.data)
 
         # When note's parent will be updated, we need to remove
-        # this note from previousr parent children lsit and add
+        # this note from previous parent children list and add
         # it to new parent children list
         parent_upd = data.get('parent', {}) or {}
         parent_upd_id = parent_upd.get('id', None)
@@ -113,16 +118,17 @@ class NoteViewSet(viewsets.ModelViewSet):
         if not request.user.is_superuser:
             show_all = 0
 
+        query_filter = Q()
         # Select 0 level only hierarchy nodes
-        query_filter = Q(level=0)
+        #query_filter &= Q(level=0)
 
         user_filter = Q(owner=request.user)
-        if show_all:
+        if not show_all:
             query_filter &= user_filter
 
         notes = Note.objects.filter(query_filter)\
             .select_related('owner', 'parent')
-        serializer = NoteSerializer(
+        serializer = SimplifiedNoteSerializer( #NoteSerializer(
             notes, many=True,
             context={'request': request}
         )

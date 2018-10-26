@@ -97,6 +97,18 @@ class PartialNoteSerializer(serializers.ModelSerializer):
             'has_code_box', 'has_table', 'has_image', 'has_file',
         )
 
+
+class SimplifiedNoteSerializer(serializers.ModelSerializer):
+    parent = NoteIDSerializer()
+
+    class Meta:
+        model = Note
+        fields = (
+            'id', 'name', 'syntax', 'level', 'parent',
+            'is_expanded', 'tags', 'is_read_only',
+            'has_code_box', 'has_table', 'has_image', 'has_file',
+        )
+
 class NoteSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(

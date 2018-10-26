@@ -19,6 +19,7 @@ class NoteAdmin(admin.ModelAdmin):
         return 'None'
 
     def note_children(self, instance):
+
         children = instance.children.filter(parent__id=instance.id)
 
         result = []
