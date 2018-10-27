@@ -5,7 +5,6 @@ from django.views.generic import DetailView, ListView, RedirectView, UpdateView
 
 User = get_user_model()
 
-
 class UserDetailView(LoginRequiredMixin, DetailView):
 
     model = User

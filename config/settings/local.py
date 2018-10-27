@@ -12,6 +12,9 @@ ALLOWED_HOSTS = [
     "localhost",
     "0.0.0.0",
     "127.0.0.1",
+    "199.217.118.251",
+    "82.146.44.203",
+    "185.159.131.14",
 ]
 
 # CACHES
@@ -48,6 +51,7 @@ MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']  # noqa F405
 DEBUG_TOOLBAR_CONFIG = {
     'DISABLE_PANELS': [
         'debug_toolbar.panels.redirects.RedirectsPanel',
+        'debug_toolbar.panels.profiling.ProfilingPanel',
     ],
     'SHOW_TEMPLATE_CONTEXT': True,
 }
@@ -65,3 +69,13 @@ INSTALLED_APPS += ['django_extensions']  # noqa F405
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+CORS_ORIGIN_WHITELIST = (
+    'localhost:8080',
+    '127.0.0.1:8080',
+    '0.0.0.0:8080',
+    'localhost:80',
+    '127.0.0.1:80',
+    '199.217.118.251:8080',
+    '185.159.131.14',
+)
