@@ -3,14 +3,6 @@ Cherry Note
 
 CherryTree web version
 
-.. image:: https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg
-     :target: https://github.com/pydanny/cookiecutter-django/
-     :alt: Built with Cookiecutter Django
-
-
-:License: MIT
-
-
 Settings
 --------
 
@@ -62,8 +54,11 @@ Moved to `Live reloading and SASS compilation`_.
 Deployment
 ----------
 
-The following details how to deploy this application.
+::
 
+  $ ./setup.sh
+  $ nano .env # setting up values
+  $ ./manage.py loaddata ./cherry_note/fixtures/notes.json # filling DB with test data
 
 
 Docker
