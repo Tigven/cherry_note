@@ -1,7 +1,8 @@
 Cherry Note
 ===========
+::
 
-CherryTree_ web version
+  CherryTree_ web version  
 .. _CherryTree: https://www.giuspen.com/cherrytree/
 
 Deployment
