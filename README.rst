@@ -8,9 +8,9 @@ Deployment
 ----------
 ::
 
-  ``$ ./setup.sh``
-  ``$ nano .env # setting up values``
-  $`` ./manage.py loaddata ./cherry_note/fixtures/notes.json # filling DB with test data``
+  $ ./setup.sh
+  $ nano .env # setting up values
+  $ ./manage.py loaddata ./cherry_note/fixtures/notes.json # filling DB with test data
 
 Settings
 --------
