@@ -1,8 +1,7 @@
 Cherry Note
 ===========
 
-  Backend for the web version of CherryTree_.
-.. _CherryTree: https://www.giuspen.com/cherrytree/
+Backend for the web version of `CherryTree <https://www.giuspen.com/cherrytree/>`_.
 
 Deployment
 ----------
