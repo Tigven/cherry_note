@@ -1,12 +1,11 @@
 Cherry Note
 ===========
 
-  CherryTree_ web version
-.. _CherryTree: https://www.giuspen.com/cherrytree/
+Backend for the web version of `CherryTree <https://www.giuspen.com/cherrytree/>`_.
 
 Deployment
 ----------
-::
+.. code:: shell
 
   $ ./setup.sh
   $ nano .env # setting up values
