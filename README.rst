@@ -37,6 +37,9 @@ Running tests with py.test
 
 Docker
 ^^^^^^
+.. code:: shell
+
+  $ docker-compose -f local.yml up
 
 See detailed `cookiecutter-django Docker documentation`_.
 

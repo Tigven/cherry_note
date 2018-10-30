@@ -12,7 +12,7 @@ ENV/
 .env
 
 # PyCharm
-.idea/
+.idea/*
 
 # Others
 .DS_Store
