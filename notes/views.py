@@ -12,7 +12,7 @@ from rest_framework.authentication import (
 )
 from rest_framework import permissions
 
-from notes.models import Note, Tag
+from notes.models import Note, Tag, User
 from notes.serializers import (
     NoteSerializer,
     TagModelSerializer,
@@ -182,3 +182,22 @@ class UserNotesAPIView(APIView):
         )
 
         return Response(serializer.data)
+
+    def post(self, request, user_id=None):
+        owner = get_object_or_404(User, id=user_id)
+        handle_uploaded_file(request.FILES['file'], owner)
+
+
+def handle_uploaded_file(f, owner):
+    import sqlite3
+    conn = sqlite3.connect(f)
+    cur = conn.cursor()
+    for _, title, txt, syntax, tags, is_ro,\
+        is_rich_text, has_codebox, has_table,\
+        has_image, level, created, updated \
+            in cur.execute("SELECT * FROM node"):
+        #txt = parse_txt(txt)
+        syntax = "CU" if 'cu' in syntax else "SI"
+        Note.objects.create_or_update(name=title, content=txt, syntax=syntax, tags=tags, is_read_only=bool(is_ro),
+                                      is_expanded=is_rich_text, has_codebox=has_codebox, has_table=has_table,
+                                      has_image=has_image, level=level, owner=owner)

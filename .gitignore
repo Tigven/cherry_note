@@ -12,6 +12,7 @@ ENV/
 .env
 
 # PyCharm
+.idea/
 .idea/*
 
 # Others
