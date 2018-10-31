@@ -12,7 +12,7 @@ from rest_framework.authentication import (
 )
 from rest_framework import permissions
 
-from notes.models import Note, Tag, User
+from notes.models import Note, Tag, User, Table, CodeBox, File
 from notes.serializers import (
     NoteSerializer,
     TagModelSerializer,
@@ -210,10 +210,28 @@ def handle_uploaded_file(f, owner):
             note = Note.objects.get(pk=notes_map[pk])
             parent_node_id = notes_map.get(parent)
             if parent_node_id:
-                parent = Note.objects.get(pk=notes_map[parent])
-                note.parent = parent
+                note.parent_id = parent_node_id
                 note.save()
+                parent = Note.objects.get(pk=notes_map[parent])
                 parent.children.add(note)
+
+    just_map = {'left': 'LT', 'right': 'RT', 'center': 'CR'}
+    for pk, offset, justification, txt, syntax,\
+        w, h, is_width_pix, do_higl_bra, show_line_no\
+            in cur.execute("SELECT * FROM codebox"):
+        just = just_map.get(justification)
+        syntax_map = {'python2': 'PY2', 'python3': 'PY3', 'python': 'PY3'}
+        CodeBox.objects.create(note_id=notes_map[pk], justification=just, offset=offset, code=txt,
+                               syntax=syntax_map.get(syntax), width=w, height=h, show_line_no=show_line_no)
+
+    for pk, offset, justification, txt, col_min, col_max in cur.execute("SELECT * FROM grid"):
+        just = just_map.get(justification)
+        Table.objects.create(note_id=notes_map[pk], justification=just, offset=offset, content=txt)
+
+    # for pk, offset, justification, anchor, png, filename, ink, time in cur.execute("SELECT * FROM image"):
+    #     just = just_map.get(justification)
+    #     File.objects.create(note=notes_map[pk], justification=just, offset=offset, content=txt owner=owner)
+
 
 #TODO:
 def parse_txt(txt):
