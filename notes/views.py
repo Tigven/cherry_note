@@ -198,7 +198,7 @@ def handle_uploaded_file(f, owner):
         is_rich_text, has_codebox, has_table,\
         has_image, level in cur.execute("SELECT * FROM node"):
 
-        #txt = parse_txt(txt)
+        txt = parse_txt(txt)
         syntax = "CU" if 'cu' in syntax else "SI"
         note = Note.objects.create(name=title, content=txt, syntax=syntax, tags=tags, is_read_only=bool(is_ro),
                                       is_expanded=is_rich_text, has_code_box=has_codebox, has_table=has_table,
@@ -207,10 +207,6 @@ def handle_uploaded_file(f, owner):
 
     for pk, parent, seq \
             in cur.execute("SELECT * FROM children"):
-            print('_'*10)
-            print(notes_map)
-            print('{} {}'.format(pk, parent))
-            print(notes_map[pk])
             note = Note.objects.get(pk=notes_map[pk])
             parent_node_id = notes_map.get(parent)
             if parent_node_id:
@@ -218,3 +214,8 @@ def handle_uploaded_file(f, owner):
                 note.parent = parent
                 note.save()
                 parent.children.add(note)
+
+#TODO:
+def parse_txt(txt):
+    """Parse cherry tree XML into HTML"""
+    return txt
